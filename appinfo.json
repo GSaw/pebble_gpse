@@ -1,0 +1,43 @@
+{
+    "appKeys": {
+        "message": 1,
+        "status": 0
+    },
+    "capabilities": [
+        ""
+    ],
+    "companyName": "georg.the.moon@gmail.com",
+    "longName": "gpse",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "fonts/icons.ttf",
+                "name": "FONT_ICONS_16",
+                "type": "font"
+            },
+            {
+                "file": "fonts/nimbus-sans-l_bold-condensed.ttf",
+                "name": "FONT_SENSORS_16",
+                "type": "font"
+            },
+            {
+                "characterRegex": "[0-9.: ]",
+                "file": "fonts/nimbus-sans-l_regular-condensed.ttf",
+                "name": "FONT_TIME_42",
+                "type": "font"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "gpse",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "01a602e0-937d-4dce-8e4e-aed7295b09f6",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
