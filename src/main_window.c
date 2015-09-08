@@ -46,7 +46,6 @@ static int g_daynight = 0;
 static int g_daynight_len = 0;
 static int g_daynight_rem = 0;
 
-
 static void create_text_layer(TextLayer** layer, GRect grect, const char* text, const char* font, GTextAlignment align) {
   *layer = text_layer_create(grect);
   text_layer_set_background_color(*layer, GColorClear);
@@ -71,7 +70,7 @@ static void create_text_layer_left(TextLayer** layer, GRect grect, const char* t
 
 static void battery_handler(BatteryChargeState charge_state) {
   const char* batt_status = ICON_BATT_0;
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "charged %d%%", charge_state.charge_percent );
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "charged %d%%", charge_state.charge_percent );
   
   if(charge_state.charge_percent > 85) {
       batt_status = ICON_BATT_100;
@@ -101,6 +100,7 @@ static void draw_daynight(Layer *this_layer, GContext *ctx) {
   }
   
   GRect bounds = layer_get_bounds(this_layer);
+  graphics_draw_rect(ctx, bounds);
   
   GColor c1 = GColorBlack;
   GColor c2 = GColorWhite;
@@ -109,77 +109,76 @@ static void draw_daynight(Layer *this_layer, GContext *ctx) {
     c1 = GColorWhite;
     c2 = GColorBlack;
   }
+
   graphics_context_set_fill_color(ctx, c2);
   graphics_context_set_stroke_color(ctx, c1);
-  graphics_fill_rect(ctx, GRect(0, 0, bounds.size.w, bounds.size.h), 0, GCornerNone); 
   
+  graphics_fill_rect(ctx, GRect(1, 1, bounds.size.w - 1, bounds.size.h - 1), 0, GCornerNone); 
   
   //graphics_context_set_fill_color(ctx, GColorBlack);
-  graphics_draw_rect(ctx, bounds);
   int hours = g_daynight_len / 60;
   int hour_width = bounds.size.w / hours; 
   int fill_mins = (g_daynight_len - g_daynight_rem);
   int fill_width = fill_mins * bounds.size.w / g_daynight_len;
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "mins fill = %d, fill_width = %d, w = %d, daylen = %d", fill_mins, fill_width, bounds.size.w, g_daynight_len );
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "mins fill = %d, fill_width = %d, w = %d, daylen = %d", fill_mins, fill_width, bounds.size.w, g_daynight_len );
   
   for(int i = 0; i <= hours; i++) {
-    GPoint p0 = GPoint(i * hour_width, 0);
-    GPoint p1 = GPoint(i * hour_width, bounds.size.h);    
+    GPoint p0 = GPoint(i * hour_width, 1);
+    GPoint p1 = GPoint(i * hour_width, bounds.size.h-1);    
     graphics_draw_line(ctx, p0, p1);
   }
 
   graphics_context_set_fill_color(ctx, c1);
   graphics_context_set_stroke_color(ctx, c2);
 
-  graphics_fill_rect(ctx, GRect(0, 0, fill_width, bounds.size.h), 0, GCornerNone); 
-  graphics_draw_rect(ctx, bounds);
+  graphics_fill_rect(ctx, GRect(1, 1, fill_width, bounds.size.h-1), 0, GCornerNone); 
+  //graphics_draw_rect(ctx, bounds);
   
   hours = (g_daynight_len - g_daynight_rem) / 60;
-
-
-  for(int i = 0; i < hours; i++) {
-    GPoint p0 = GPoint(i * hour_width, 0);
-    GPoint p1 = GPoint(i * hour_width, bounds.size.h);    
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "hours %d", hours );
+  for(int i = 0; i <= hours; i++) {
+    GPoint p0 = GPoint(i * hour_width, 1);
+    GPoint p1 = GPoint(i * hour_width, bounds.size.h-1);    
     graphics_draw_line(ctx, p0, p1);
   }
   
 }
 
-void update_data(const char* dateString, const char* dist, const char* alt, const char* coords, const char* sunrise, const char* sunset, int last_update, int phone_battery_level, int daynight, int daynight_len, int daynight_rem) {
+void update_data(struct gpse_data gpse_data) {
   //if(NULL != dateString)  text_layer_set_text(s_date_layer, dateString);
   time_t current_time = time(NULL);
   last_data_update = current_time;
   check_connection();
-  if(NULL != dist)  text_layer_set_text(s_dist_layer, dist);
-  if(NULL != alt)  text_layer_set_text(s_alt_layer, alt);
-  if(NULL != coords)  text_layer_set_text(s_coords_layer, coords);
-  if(NULL != sunrise)  text_layer_set_text(s_sunrise_layer, sunrise);
-  if(NULL != sunset)  text_layer_set_text(s_sunset_layer, sunset);
+  if(NULL != gpse_data.dist)  text_layer_set_text(s_dist_layer, gpse_data.dist);
+  if(NULL != gpse_data.alt)  text_layer_set_text(s_alt_layer, gpse_data.alt);
+  if(NULL != gpse_data.coords)  text_layer_set_text(s_coords_layer, gpse_data.coords);
+  if(NULL != gpse_data.sunrise)  text_layer_set_text(s_sunrise_layer, gpse_data.sunrise);
+  if(NULL != gpse_data.sunset)  text_layer_set_text(s_sunset_layer, gpse_data.sunset);
   
 
   const char* batt_status = ICON_BATT_0;
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "phone charged %d%%", phone_battery_level );
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "phone charged %d%%", gpse_data.phone_battery_level );
   
-  if(phone_battery_level > 85) {
+  if(gpse_data.phone_battery_level > 85) {
       batt_status = ICON_BATT_100;
-  } else if(phone_battery_level > 50) {
+  } else if(gpse_data.phone_battery_level > 50) {
       batt_status = ICON_BATT_75;
-  } else if(phone_battery_level > 15) {
+  } else if(gpse_data.phone_battery_level > 15) {
       batt_status = ICON_BATT_25;
   } 
   text_layer_set_text(s_phone_batt_layer, batt_status);
   
-  if(last_update > 5 * 60) {
+  if(gpse_data.last_update > 5 * 60) {
       text_layer_set_text(s_tracking_layer, ICON_TRACKING_OFF);
   } else {
       text_layer_set_text(s_tracking_layer, ICON_TRACKING_ON);
   }
   
-  g_daynight = daynight;
-  g_daynight_len = daynight_len;
-  g_daynight_rem = daynight_rem;
+  g_daynight = gpse_data.daynight;
+  g_daynight_len = gpse_data.daynight_len;
+  g_daynight_rem = gpse_data.daynight_rem;
   
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "daynight_ley = %d, daynight_rem = %d, daynight = %d", daynight_len, daynight_rem, daynight );
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "daynight_ley = %d, daynight_rem = %d, daynight = %d", g_daynight_len, g_daynight_rem, g_daynight );
 }
 
 static void update_time() {
@@ -293,7 +292,7 @@ void create_window() {
   s_icons_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ICONS_16));
 
   
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "window create");
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "window create");
   window = window_create();
   window_set_background_color(window,COLOR_BACKGROUND);
     
@@ -303,7 +302,7 @@ void create_window() {
     .unload = main_window_unload
   });  
   
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "show window");
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "show window");
 	window_stack_push(window, true);
   update_time();
   // Register with TickTimerService

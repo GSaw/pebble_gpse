@@ -26,52 +26,56 @@ static char* read_string(DictionaryIterator *received, int field) {
 
 // Called when a message is received from PebbleKitJS
 static void in_received_handler(DictionaryIterator *received, void *context) {
+  
+  struct gpse_data gpse_data;
+  
+  
 	Tuple *tuple;
-  char* date = NULL;
-  char* dist = NULL;
-  char* alt = NULL;
-  char* coords = NULL;
-  char* sunrise = NULL;
-  char* sunset = NULL;
-  int last_update = -1;
-  int phone_battery_level = 0;
-  int daynight = 0;
-  int daynight_len = 0;
-  int daynight_rem = 0;
+  gpse_data.dateString = NULL;
+  gpse_data.dist = NULL;
+  gpse_data.alt = NULL;
+  gpse_data.coords = NULL;
+  gpse_data.sunrise = NULL;
+  gpse_data.sunset = NULL;
+  gpse_data.last_update = -1;
+  gpse_data.phone_battery_level = 0;
+  gpse_data.daynight = 0;
+  gpse_data.daynight_len = 0;
+  gpse_data.daynight_rem = 0;
   
 	tuple = dict_find(received, LAST_UPDATE_KEY);
 	if(tuple) {
-		last_update = (int)tuple->value->uint32; 
+		gpse_data.last_update = (int)tuple->value->uint32; 
 	}
 	tuple = dict_find(received, PHONE_BATTERY_KEY);
 	if(tuple) {
-		phone_battery_level = (int)tuple->value->uint32; 
+		gpse_data.phone_battery_level = (int)tuple->value->uint32; 
 	}
 
 	tuple = dict_find(received, DAYNIGHT);
 	if(tuple) {
-		daynight = (int)tuple->value->uint32; 
+		gpse_data.daynight = (int)tuple->value->uint32; 
 	}
 
  	tuple = dict_find(received, DAYNIGHT_LENGTH);
 	if(tuple) {
-		daynight_len = (int)tuple->value->uint32; 
+		gpse_data.daynight_len = (int)tuple->value->uint32; 
 	}
 
 	tuple = dict_find(received, DAYNIGHT_REMAINING);
 	if(tuple) {
-		daynight_rem = (int)tuple->value->uint32; 
+		gpse_data.daynight_rem = (int)tuple->value->uint32; 
 	}
 
   
-  date = read_string(received, DATE_KEY);
-  dist = read_string(received, DIST_KEY);
-  alt = read_string(received, ALT_KEY);
-  coords = read_string(received, COORDS_KEY);
-  sunrise = read_string(received, SUNRISE_KEY);
-  sunset = read_string(received, SUNSET_KEY);
+  gpse_data.dateString = read_string(received, DATE_KEY);
+  gpse_data.dist = read_string(received, DIST_KEY);
+  gpse_data.alt = read_string(received, ALT_KEY);
+  gpse_data.coords = read_string(received, COORDS_KEY);
+  gpse_data.sunrise = read_string(received, SUNRISE_KEY);
+  gpse_data.sunset = read_string(received, SUNSET_KEY);
 	
-  update_data(date,dist, alt, coords, sunrise, sunset, last_update, phone_battery_level, daynight, daynight_len, daynight_rem);
+  update_data(gpse_data);
   
 }
 
