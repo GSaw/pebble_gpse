@@ -16,6 +16,17 @@ enum {
   DAYNIGHT_REMAINING
 };
 
+// Write message to buffer & send
+void send_message(void){
+	DictionaryIterator *iter;
+	
+	app_message_outbox_begin(&iter);
+	dict_write_uint8(iter, 0, 1);
+	
+	dict_write_end(iter);
+  app_message_outbox_send();
+}
+
 static char* read_string(DictionaryIterator *received, int field) {
   Tuple *tuple = dict_find(received, field);
   if(tuple) {
@@ -87,6 +98,24 @@ static void in_dropped_handler(AppMessageResult reason, void *context) {
 static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
 }
 
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "SELECT" );
+}
+
+static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "UP" );
+}
+
+static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "DOWN" );
+}
+
+static void click_config_provider(void *context) {
+  window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
+  window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
+  window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
+}
+
 void init(void) {
 
 	
@@ -98,6 +127,8 @@ void init(void) {
 	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 	
   create_window();
+  window_set_click_config_provider(window, click_config_provider);
+  send_message();
 }
 
 void deinit(void) {

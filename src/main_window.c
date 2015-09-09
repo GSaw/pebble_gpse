@@ -294,6 +294,9 @@ void create_window() {
   
   //APP_LOG(APP_LOG_LEVEL_DEBUG, "window create");
   window = window_create();
+  #ifdef PBL_SDK_2
+  window_set_fullscreen(window, true);
+  #endif
   window_set_background_color(window,COLOR_BACKGROUND);
     
   // Set handlers to manage the elements inside the Window

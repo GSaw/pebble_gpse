@@ -12,6 +12,12 @@
     "resources": {
         "media": [
             {
+                "file": "images/menu_icon.png",
+                "menuIcon": true,
+                "name": "IMAGE_MENU_ICON",
+                "type": "png"
+            },
+            {
                 "file": "fonts/icons.ttf",
                 "name": "FONT_ICONS_16",
                 "type": "font"
@@ -38,6 +44,6 @@
     "uuid": "01a602e0-937d-4dce-8e4e-aed7295b09f6",
     "versionLabel": "1.0",
     "watchapp": {
-        "watchface": true
+        "watchface": false
     }
 }
