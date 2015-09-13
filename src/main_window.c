@@ -42,9 +42,9 @@ const char* ICON_TRACKING_OFF = "\U0000E808";
 
 static time_t last_data_update = 0;
 
-static int g_daynight = 0;
-static int g_daynight_len = 0;
-static int g_daynight_rem = 0;
+static int g_daynight = 1;
+static int g_daynight_len = 340;
+static int g_daynight_rem = 145;
 
 static void create_text_layer(TextLayer** layer, GRect grect, const char* text, const char* font, GTextAlignment align) {
   *layer = text_layer_create(grect);
@@ -100,46 +100,75 @@ static void draw_daynight(Layer *this_layer, GContext *ctx) {
   }
   
   GRect bounds = layer_get_bounds(this_layer);
-  graphics_draw_rect(ctx, bounds);
+  //graphics_draw_rect(ctx, GRect(1, 1, bounds.size.w - 2, bounds.size.h - 2));
   
   GColor c1 = GColorBlack;
   GColor c2 = GColorWhite;
-  
+  int wdecl = 1;
   if(g_daynight == 0) {
     c1 = GColorWhite;
     c2 = GColorBlack;
+    wdecl = 0;
   }
 
-  graphics_context_set_fill_color(ctx, c2);
   graphics_context_set_stroke_color(ctx, c1);
+  graphics_context_set_fill_color(ctx, c2);
+  //graphics_fill_rect(ctx, GRect(0, 0, bounds.size.w, bounds.size.h), 0, GCornerNone);
   
-  graphics_fill_rect(ctx, GRect(1, 1, bounds.size.w - 1, bounds.size.h - 1), 0, GCornerNone); 
+  //graphics_context_set_stroke_color(ctx, c1);
   
   //graphics_context_set_fill_color(ctx, GColorBlack);
   int hours = g_daynight_len / 60;
+  if(g_daynight_len % 60) hours += 1;
   int hour_width = bounds.size.w / hours; 
+  
   int fill_mins = (g_daynight_len - g_daynight_rem);
-  int fill_width = fill_mins * bounds.size.w / g_daynight_len;
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "mins fill = %d, fill_width = %d, w = %d, daylen = %d", fill_mins, fill_width, bounds.size.w, g_daynight_len );
-  
-  for(int i = 0; i <= hours; i++) {
-    GPoint p0 = GPoint(i * hour_width, 1);
-    GPoint p1 = GPoint(i * hour_width, bounds.size.h-1);    
-    graphics_draw_line(ctx, p0, p1);
+
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "g_daynight_len = %d, g_daynight_rem = %d", g_daynight_len, g_daynight_rem );
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "hours = %d, hour_width = %d, fill_mins = %d", hours, hour_width, fill_mins );
+  int last_h = 0;
+  for(int i = 0; i < hours; i++) {
+    int x = i * hour_width;
+    int w = hour_width -wdecl; if(w <= 0) w = 1;
+    int pf = 0;
+    if(g_daynight_len >= i * 60 + 60) {
+      //full fill the hour  
+      pf = bounds.size.h;
+    } else if( 0 < g_daynight_len - i * 60) {
+      int r = g_daynight_len - i * 60;
+      pf = r * bounds.size.h / 60;
+    }
+    if(pf) {
+      last_h = pf;
+      GRect rect = GRect(x, bounds.size.h - pf, w, pf);
+      graphics_fill_rect(ctx, rect, 0, GCornerNone);
+      graphics_draw_rect(ctx, rect);
+    }  
   }
-
-  graphics_context_set_fill_color(ctx, c1);
+  //if(g_daynight_len < 3000) {
+  //  return;
+  //}
   graphics_context_set_stroke_color(ctx, c2);
-
-  graphics_fill_rect(ctx, GRect(1, 1, fill_width, bounds.size.h-1), 0, GCornerNone); 
-  //graphics_draw_rect(ctx, bounds);
+  graphics_context_set_fill_color(ctx, c1);
   
-  hours = (g_daynight_len - g_daynight_rem) / 60;
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "hours %d", hours );
-  for(int i = 0; i <= hours; i++) {
-    GPoint p0 = GPoint(i * hour_width, 1);
-    GPoint p1 = GPoint(i * hour_width, bounds.size.h-1);    
-    graphics_draw_line(ctx, p0, p1);
+  for(int i = 0; i < hours; i++) {
+    int x = i * hour_width;
+    int w = hour_width -wdecl; if(w <= 0) w = 1;
+    int pf = 0;
+    int y = 0;
+    if(i == hours -1 ) y = bounds.size.h - last_h;
+    if(fill_mins >= i * 60 + 60) {
+      //full fill the hour  
+      //y = 0;
+      pf = bounds.size.h;
+    } else if( 0 < fill_mins - i * 60) {
+      int r = fill_mins - i * 60;
+      pf = r * bounds.size.h / 60;
+    }
+    if(pf) {
+      GRect rect = GRect(x, y, w, pf);
+      graphics_fill_rect(ctx, rect, 0, GCornerNone);
+    }
   }
   
 }
@@ -321,4 +350,3 @@ void destroy_window() {
     // Destroy Window
     window_destroy(window);  
 }
-

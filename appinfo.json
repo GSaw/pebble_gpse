@@ -24,6 +24,11 @@
             },
             {
                 "file": "fonts/nimbus-sans-l_bold-condensed.ttf",
+                "name": "FONT_REMMINS_36",
+                "type": "font"
+            },
+            {
+                "file": "fonts/nimbus-sans-l_bold-condensed.ttf",
                 "name": "FONT_SENSORS_16",
                 "type": "font"
             },
