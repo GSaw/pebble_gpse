@@ -12,6 +12,12 @@
     "resources": {
         "media": [
             {
+                "characterRegex": "[0-9:]",
+                "file": "fonts/ObliviousFont.ttf",
+                "name": "FONT_OB_44",
+                "type": "font"
+            },
+            {
                 "file": "images/menu_icon.png",
                 "menuIcon": true,
                 "name": "IMAGE_MENU_ICON",
