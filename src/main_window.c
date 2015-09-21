@@ -194,6 +194,9 @@ static void set_time(time_t time, TextLayer* layer, char* buffer) {
 }
 
 void update_data() {
+    
+      time_t tick_time = time(NULL);
+    
   check_connection();
     
   if(data.update) {
@@ -207,12 +210,19 @@ void update_data() {
     return;
   }
   APP_LOG(APP_LOG_LEVEL_DEBUG, "show data" );
-
-  if(data.last_track_update > 5 * 60) {
-     text_layer_set_text(s_tracking_layer, ICON_TRACKING_OFF);
-  } else {
-    text_layer_set_text(s_tracking_layer, ICON_TRACKING_ON);
-  }
+    
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "updates %d, %d, %d, %d", 
+            (int)data.last_data_update, 
+            (int)data.last_track_update,
+            (int)(data.last_data_update - data.last_track_update),
+            (int)tick_time
+           );
+    
+    if(data.last_data_update - data.last_track_update < tick_time - 5 * 60) {
+        text_layer_set_text(s_tracking_layer, ICON_TRACKING_OFF);
+    } else {
+        text_layer_set_text(s_tracking_layer, ICON_TRACKING_ON);
+    }
   
   text_layer_set_text(s_dist_layer, data.dist);
   text_layer_set_text(s_alt_layer, data.alt);
@@ -238,7 +248,7 @@ void update_data() {
       batt_status = ICON_BATT_25;
   } 
   text_layer_set_text(s_phone_batt_layer, batt_status);
-  data.last_data_shown = time(NULL);
+  data.last_data_shown = tick_time;
 }
 
 static void update_time() {
